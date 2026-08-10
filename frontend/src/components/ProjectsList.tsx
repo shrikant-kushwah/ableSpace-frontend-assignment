@@ -5,10 +5,8 @@ import { useApp, Task, User } from '@/context/AppContext';
 import { 
   Search, 
   Filter, 
-  Eye, 
   Plus, 
   MoreHorizontal, 
-  User as UserIcon,
   Trash2,
   Edit3
 } from 'lucide-react';
@@ -21,7 +19,6 @@ interface ProjectsListProps {
 export default function ProjectsList({ onSelectTask }: ProjectsListProps) {
   const { 
     tasks, 
-    users, 
     searchQuery, 
     setSearchQuery, 
     selectedPriority, 

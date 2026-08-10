@@ -91,7 +91,14 @@ export default function Sidebar({ activeTab = 'tasks', setActiveTab }: SidebarPr
             <span>Tasks</span>
           </button>
           
-          <button className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-border-color/20 text-sm font-medium transition-all duration-150">
+          <button 
+            onClick={() => setActiveTab && setActiveTab('projects')}
+            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-150 ${
+              activeTab === 'projects'
+                ? 'bg-accent-light text-accent font-semibold text-sm'
+                : 'text-text-secondary hover:text-text-primary hover:bg-border-color/20 text-sm font-medium'
+            }`}
+          >
             <Folder size={18} />
             <span>Projects</span>
           </button>
