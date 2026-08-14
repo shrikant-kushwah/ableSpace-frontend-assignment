@@ -74,6 +74,7 @@ interface AppContextType {
   setViewMode: (mode: ViewMode) => void;
   loginAsGuest: (name: string) => Promise<boolean>;
   loginWithGoogleMock: (name: string, email: string, avatarUrl: string) => Promise<boolean>;
+  loginWithGoogle: (token: string) => Promise<boolean>;
   updateProfile: (updates: Partial<User>) => Promise<boolean>;
   logout: () => void;
   fetchTasks: () => Promise<void>;
@@ -222,6 +223,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const data = await apiFetch('/auth/google-mock', {
         method: 'POST',
         body: JSON.stringify({ name, email, avatarUrl }),
+      });
+
+      setToken(data.access_token);
+      setUser(data.user);
+      localStorage.setItem('tms_token', data.access_token);
+      localStorage.setItem('tms_user', JSON.stringify(data.user));
+      return true;
+    } catch (err: any) {
+      setError(err.message || 'Google Login failed');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loginWithGoogle = async (token: string): Promise<boolean> => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const data = await apiFetch('/auth/google', {
+        method: 'POST',
+        body: JSON.stringify({ token }),
       });
 
       setToken(data.access_token);
@@ -458,6 +481,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setViewMode,
         loginAsGuest,
         loginWithGoogleMock,
+        loginWithGoogle,
         updateProfile,
         logout,
         fetchTasks,

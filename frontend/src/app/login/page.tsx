@@ -5,10 +5,31 @@ import { useApp } from '@/context/AppContext';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
-  const { user, loginAsGuest, loginWithGoogleMock, isLoading, error } = useApp();
+  const { user, loginAsGuest, loginWithGoogleMock, loginWithGoogle, isLoading, error } = useApp();
   const [guestName, setGuestName] = useState('');
   const [showNameInput, setShowNameInput] = useState(false);
+  const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   const router = useRouter();
+
+  // Load Google Identity Services script dynamically if Client ID is configured
+  useEffect(() => {
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    if (!clientId) return;
+
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => setIsScriptLoaded(true);
+    document.body.appendChild(script);
+
+    return () => {
+      // Clean up script on unmount
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
 
   // If already logged in, redirect to task board
   useEffect(() => {
@@ -16,6 +37,37 @@ export default function LoginPage() {
       router.push('/');
     }
   }, [user, router]);
+
+  // Render Google Sign-In Button
+  useEffect(() => {
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    if (!isScriptLoaded || !clientId || !(window as any).google) return;
+
+    try {
+      const google = (window as any).google;
+      google.accounts.id.initialize({
+        client_id: clientId,
+        callback: async (response: any) => {
+          const success = await loginWithGoogle(response.credential);
+          if (success) {
+            router.push('/');
+          }
+        },
+      });
+
+      google.accounts.id.renderButton(
+        document.getElementById('google-signin-button'),
+        {
+          theme: 'outline',
+          size: 'large',
+          shape: 'pill',
+          width: 320, // Matches max-w-sm card layout width
+        }
+      );
+    } catch (err) {
+      console.error('Failed to initialize Google Sign-In:', err);
+    }
+  }, [isScriptLoaded, loginWithGoogle, router]);
 
   const handleGuestLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +79,7 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = async () => {
-    // Mock Google sign in
+    // Mock Google sign in (fallback when Client ID is not configured)
     const success = await loginWithGoogleMock(
       'Google Developer',
       'google.dev@tms.local',
@@ -113,31 +165,43 @@ export default function LoginPage() {
             </button>
           )}
 
-          <button
-            onClick={handleGoogleLogin}
-            className="w-full flex items-center justify-center py-2.5 px-4 border border-border-color rounded-full text-xs font-semibold text-text-primary bg-card-bg hover:bg-app-bg transition-all duration-150"
-          >
-            {/* Google Icon */}
-            <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
-              <path
-                fill="#4285F4"
-                d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.69a5.74 5.74 0 0 1-2.44 3.77v3.12h3.94c2.31-2.12 3.65-5.24 3.65-8.94z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 24c3.24 0 5.97-1.08 7.96-2.91l-3.94-3.12c-1.1.74-2.51 1.18-4.02 1.18-3.09 0-5.7-2.08-6.64-4.89H1.38v3.22C3.36 21.36 7.42 24 12 24z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M5.36 14.26a7.2 7.2 0 0 1 0-2.52V8.52H1.38a12.01 12.01 0 0 0 0 6.96l3.98-3.22z"
-              />
-              <path
-                fill="#EA4335"
-                d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.96 1.19 15.24 0 12 0 7.42 0 3.36 2.64 1.38 6.52l3.98 3.22c.94-2.81 3.55-4.89 6.64-4.89z"
-              />
-            </svg>
-            Login with Google
-          </button>
+          {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ? (
+            <div className="w-full flex justify-center py-1">
+              <div id="google-signin-button"></div>
+            </div>
+          ) : (
+            <button
+              onClick={handleGoogleLogin}
+              className="w-full flex items-center justify-center py-2.5 px-4 border border-border-color rounded-full text-xs font-semibold text-text-primary bg-card-bg hover:bg-app-bg transition-all duration-150"
+            >
+              {/* Google Icon */}
+              <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
+                <path
+                  fill="#4285F4"
+                  d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.69a5.74 5.74 0 0 1-2.44 3.77v3.12h3.94c2.31-2.12 3.65-5.24 3.65-8.94z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 24c3.24 0 5.97-1.08 7.96-2.91l-3.94-3.12c-1.1.74-2.51 1.18-4.02 1.18-3.09 0-5.7-2.08-6.64-4.89H1.38v3.22C3.36 21.36 7.42 24 12 24z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.36 14.26a7.2 7.2 0 0 1 0-2.52V8.52H1.38a12.01 12.01 0 0 0 0 6.96l3.98-3.22z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.96 1.19 15.24 0 12 0 7.42 0 3.36 2.64 1.38 6.52l3.98 3.22c.94-2.81 3.55-4.89 6.64-4.89z"
+                />
+              </svg>
+              Login with Google (Mock Mode)
+            </button>
+          )}
+
+          {!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (
+            <div className="p-3 text-[10px] text-amber-600 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-xl leading-normal text-left">
+              <strong>Notice:</strong> Google login is running in Mock Mode. To enable real Google Sign-In, add your <code>NEXT_PUBLIC_GOOGLE_CLIENT_ID</code> to <code>frontend/.env.local</code>.
+            </div>
+          )}
         </div>
 
       </div>

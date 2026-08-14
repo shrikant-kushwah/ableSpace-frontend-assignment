@@ -24,6 +24,11 @@ export class AuthController {
     return this.authService.googleMockLogin(email, name, avatarUrl);
   }
 
+  @Post('google')
+  async googleLogin(@Body('token') token: string) {
+    return this.authService.googleLogin(token);
+  }
+
   @Patch('profile')
   @UseGuards(JwtAuthGuard)
   async updateProfile(@Request() req: any, @Body() updates: any) {

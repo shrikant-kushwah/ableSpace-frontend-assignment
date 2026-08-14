@@ -15,8 +15,8 @@ import {
 } from 'lucide-react';
 
 interface SidebarProps {
-  activeTab?: 'tasks' | 'profile';
-  setActiveTab?: (tab: 'tasks' | 'profile') => void;
+  activeTab?: 'tasks' | 'projects' | 'profile';
+  setActiveTab?: (tab: 'tasks' | 'projects' | 'profile') => void;
 }
 
 export default function Sidebar({ activeTab = 'tasks', setActiveTab }: SidebarProps) {
