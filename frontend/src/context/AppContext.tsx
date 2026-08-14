@@ -89,7 +89,15 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+const getApiUrl = () => {
+  let url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+  if (url.endsWith('/')) {
+    url = url.slice(0, -1);
+  }
+  return url.endsWith('/api') ? url : `${url}/api`;
+};
+
+const API_URL = getApiUrl();
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
