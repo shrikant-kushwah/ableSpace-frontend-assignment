@@ -7,15 +7,15 @@ This is a premium, full-stack Task Management System built as part of the Full S
 ## 🚀 Tech Stack
 
 ### Frontend
-- **Framework:** Next.js (App Router)
+- **Framework:** Next.js
 - **Language:** TypeScript
-- **Styling:** Tailwind CSS (v4 Directives & Custom CSS Variables)
+- **Styling:** Tailwind CSS
 - **Icons:** Lucide React
 
 ### Backend
 - **Framework:** NestJS
 - **Language:** TypeScript
-- **Database:** MongoDB (via Mongoose ODM)
+- **Database:** MongoDB
 - **Validation:** Class-validator & Class-transformer
 - **Authentication:** Passport-JWT
 
@@ -67,11 +67,11 @@ This enables native styling across all components with classes like `bg-accent`,
 ## ⚙️ How to Setup and Run Locally
 
 ### Prerequisites
-- Node.js (v24 recommended, tested on v24)
-- Local MongoDB running on default port `27017` (or a MongoDB Atlas URI)
+- Node.js (v18+ recommended, tested on v22)
+- Local MongoDB running on default port `27017`
 
 ### 1. Run the NestJS Backend
-The backend server runs on port `8080` and connects to the MongoDB database specified in `MONGO_URI`.
+The backend server runs on port `8080` and connects to the local MongoDB database at `mongodb://localhost:27017/tms`.
 
 1. Navigate to the backend directory:
    ```bash
@@ -83,37 +83,12 @@ The backend server runs on port `8080` and connects to the MongoDB database spec
    ```
 3. Start the NestJS development server:
    ```bash
-   npm run dev
-   # or
    npm run start:dev
    ```
    *Note: On startup, the backend automatically seeds the database with team members and 11 tasks matching the exact properties and text in the Figma design if the database is empty.*
 
-### 2. Environment Variables Configuration
-
-Create the environment files in their respective folders to align backend ports and database settings:
-
-#### Backend (`backend/.env`)
-```ini
-PORT=8080
-MONGO_URI=mongodb://localhost:27017/tms
-JWT_SECRET=supersecretkeyfortmsproj
-
-# Optional: Add to enable real Google Sign-In
-GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
-```
-
-#### Frontend (`frontend/.env.local`)
-```ini
-NEXT_PUBLIC_API_URL=http://localhost:8080/api
-
-# Optional: Add to enable real Google Sign-In
-NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
-```
-*Note: If no Google Client ID is configured, the frontend automatically displays a notice banner and falls back to Google Login Mock Mode for seamless local testing.*
-
-### 3. Run the Next.js Frontend
-The frontend runs on port `3000` and requests API endpoints from `NEXT_PUBLIC_API_URL`.
+### 2. Run the Next.js Frontend
+The frontend runs on port `3000` and proxies API requests to `http://localhost:8080/api`.
 
 1. Navigate to the frontend directory:
    ```bash
