@@ -93,12 +93,12 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-app-bg px-4 py-12 transition-colors duration-200">
       <div className="w-full max-w-sm space-y-8 bg-card-bg p-8 rounded-2xl border border-border-color shadow-sm transition-colors duration-200">
-        
+
         {/* Pyramid Logo - Stacked Vertically */}
         <div className="flex flex-col items-center justify-center space-y-2">
-          <svg 
+          <svg
             className="h-9 w-9 text-text-primary transition-colors"
-            viewBox="0 0 24 24" 
+            viewBox="0 0 24 24"
             fill="currentColor"
           >
             <polygon points="12,3 2,21 22,21" />
@@ -121,7 +121,7 @@ export default function LoginPage() {
 
         {/* Action Buttons */}
         <div className="space-y-3 pt-1">
-          
+
           {showNameInput ? (
             <form onSubmit={handleGuestLogin} className="space-y-3">
               <div>
@@ -131,7 +131,7 @@ export default function LoginPage() {
                 <input
                   id="guest-name"
                   type="text"
-                  placeholder="e.g. Dexter"
+                  placeholder="e.g. Pyramid"
                   value={guestName}
                   onChange={(e) => setGuestName(e.target.value)}
                   className="w-full px-4 py-2 text-sm bg-app-bg border border-border-color rounded-xl focus:outline-none focus:border-accent text-text-primary focus:ring-1 focus:ring-accent"

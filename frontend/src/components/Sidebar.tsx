@@ -69,7 +69,7 @@ export default function Sidebar({ activeTab = 'tasks', setActiveTab }: SidebarPr
             </div>
             <div className="text-left">
               <div className="text-xs text-text-secondary font-medium uppercase tracking-wider">Workspace</div>
-              <div className="text-sm font-semibold text-text-primary leading-tight">Dexter</div>
+              <div className="text-sm font-semibold text-text-primary leading-tight">Pyramid</div>
             </div>
           </div>
           <div className="flex flex-col text-text-secondary">
