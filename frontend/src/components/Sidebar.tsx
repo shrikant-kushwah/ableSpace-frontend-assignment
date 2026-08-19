@@ -2,16 +2,17 @@
 
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
-import { 
-  Check, 
-  ChevronDown, 
-  ChevronUp, 
-  Folder, 
-  LayoutGrid, 
-  LogOut, 
-  Moon, 
+import {
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Folder,
+  LayoutGrid,
+  LogOut,
+  Moon,
   Sun,
-  User as UserIcon
+  User as UserIcon,
+  RotateCcw
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -20,28 +21,30 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ activeTab = 'tasks', setActiveTab }: SidebarProps) {
-  const { 
-    user, 
-    logout, 
-    theme, 
-    setTheme, 
-    accentColor, 
+  const {
+    user,
+    logout,
+    theme,
+    setTheme,
+    accentColor,
     setAccentColor,
     reseedDatabase
   } = useApp();
 
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   React.useEffect(() => {
-    if (!showLogoutConfirm) return;
+    if (!showLogoutConfirm && !showResetConfirm) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setShowLogoutConfirm(false);
+        setShowResetConfirm(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showLogoutConfirm]);
+  }, [showLogoutConfirm, showResetConfirm]);
 
   const colors: { name: 'amber' | 'blue' | 'pink' | 'rose' | 'emerald' | 'black'; hex: string }[] = [
     { name: 'amber', hex: 'bg-amber-500' },
@@ -49,15 +52,15 @@ export default function Sidebar({ activeTab = 'tasks', setActiveTab }: SidebarPr
     { name: 'pink', hex: 'bg-pink-500' },
     { name: 'rose', hex: 'bg-rose-500' },
     { name: 'emerald', hex: 'bg-emerald-500' },
-    { name: 'black', hex: 'bg-slate-900 dark:bg-slate-100' },
+    { name: 'black', hex: 'bg-slate-900 dark:bg-slate-700/50' },
   ];
 
   return (
     <div className="w-64 bg-sidebar-bg border-r border-sidebar-border h-screen flex flex-col justify-between p-4 select-none shrink-0 transition-colors duration-200">
-      
+
       {/* Top Workspace Section */}
       <div className="space-y-6">
-        
+
         {/* Workspace Dropdown Mock */}
         <div className="flex items-center justify-between p-2 rounded-xl bg-app-bg border border-border-color hover:bg-border-color/20 cursor-pointer transition-all duration-150">
           <div className="flex items-center space-x-2.5">
@@ -78,38 +81,35 @@ export default function Sidebar({ activeTab = 'tasks', setActiveTab }: SidebarPr
         {/* Navigation Categories */}
         <div className="space-y-1.5">
           <div className="px-2 text-xs font-semibold uppercase tracking-widest text-text-secondary">Workspace</div>
-          
-          <button 
+
+          <button
             onClick={() => setActiveTab && setActiveTab('tasks')}
-            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-150 ${
-              activeTab === 'tasks'
-                ? 'bg-accent-light text-accent font-semibold text-sm'
-                : 'text-text-secondary hover:text-text-primary hover:bg-border-color/20 text-sm font-medium'
-            }`}
+            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-150 ${activeTab === 'tasks'
+              ? 'bg-accent-light text-accent font-semibold text-sm'
+              : 'text-text-secondary hover:text-text-primary hover:bg-border-color/20 text-sm font-medium'
+              }`}
           >
             <LayoutGrid size={18} />
             <span>Tasks</span>
           </button>
-          
-          <button 
+
+          <button
             onClick={() => setActiveTab && setActiveTab('projects')}
-            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-150 ${
-              activeTab === 'projects'
-                ? 'bg-accent-light text-accent font-semibold text-sm'
-                : 'text-text-secondary hover:text-text-primary hover:bg-border-color/20 text-sm font-medium'
-            }`}
+            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-150 ${activeTab === 'projects'
+              ? 'bg-accent-light text-accent font-semibold text-sm'
+              : 'text-text-secondary hover:text-text-primary hover:bg-border-color/20 text-sm font-medium'
+              }`}
           >
             <Folder size={18} />
             <span>Projects</span>
           </button>
 
-          <button 
+          <button
             onClick={() => setActiveTab && setActiveTab('profile')}
-            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-150 ${
-              activeTab === 'profile'
-                ? 'bg-accent-light text-accent font-semibold text-sm'
-                : 'text-text-secondary hover:text-text-primary hover:bg-border-color/20 text-sm font-medium'
-            }`}
+            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-150 ${activeTab === 'profile'
+              ? 'bg-accent-light text-accent font-semibold text-sm'
+              : 'text-text-secondary hover:text-text-primary hover:bg-border-color/20 text-sm font-medium'
+              }`}
           >
             <UserIcon size={18} />
             <span>Profile</span>
@@ -119,29 +119,27 @@ export default function Sidebar({ activeTab = 'tasks', setActiveTab }: SidebarPr
 
       {/* Middle & Bottom Configuration Sections */}
       <div className="space-y-6 border-t border-border-color pt-4">
-        
+
         {/* Theme Settings */}
         <div className="space-y-2">
           <div className="text-xs font-semibold uppercase tracking-widest text-text-secondary px-1">Theme</div>
           <div className="grid grid-cols-2 gap-2 bg-app-bg p-1 rounded-xl border border-border-color transition-colors duration-200">
             <button
               onClick={() => setTheme('light')}
-              className={`flex items-center justify-center space-x-2 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all duration-150 ${
-                theme === 'light' 
-                  ? 'bg-card-bg text-text-primary shadow-sm border border-border-color/50' 
-                  : 'text-text-secondary hover:text-text-primary'
-              }`}
+              className={`flex items-center justify-center space-x-2 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all duration-150 ${theme === 'light'
+                ? 'bg-card-bg text-text-primary shadow-sm border border-border-color/50'
+                : 'text-text-secondary hover:text-text-primary'
+                }`}
             >
               <Sun size={14} />
               <span>Light</span>
             </button>
             <button
               onClick={() => setTheme('dark')}
-              className={`flex items-center justify-center space-x-2 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all duration-150 ${
-                theme === 'dark' 
-                  ? 'bg-card-bg text-text-primary shadow-sm border border-border-color/50' 
-                  : 'text-text-secondary hover:text-text-primary'
-              }`}
+              className={`flex items-center justify-center space-x-2 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all duration-150 ${theme === 'dark'
+                ? 'bg-card-bg text-text-primary shadow-sm border border-border-color/50'
+                : 'text-text-secondary hover:text-text-primary'
+                }`}
             >
               <Moon size={14} />
               <span>Dark</span>
@@ -161,9 +159,9 @@ export default function Sidebar({ activeTab = 'tasks', setActiveTab }: SidebarPr
                 title={c.name}
               >
                 {accentColor === c.name && (
-                  <Check 
-                    size={12} 
-                    className={c.name === 'black' ? 'text-white dark:text-slate-900' : 'text-white'} 
+                  <Check
+                    size={12}
+                    className={c.name === 'black' ? 'text-white dark:text-slate-100' : 'text-white'}
                     strokeWidth={3}
                   />
                 )}
@@ -174,7 +172,7 @@ export default function Sidebar({ activeTab = 'tasks', setActiveTab }: SidebarPr
 
         {/* Database Control Helper */}
         <button
-          onClick={reseedDatabase}
+          onClick={() => setShowResetConfirm(true)}
           className="w-full text-center text-xs py-1.5 px-2 rounded-lg border border-dashed border-border-color text-text-secondary hover:text-text-primary hover:border-accent transition-colors duration-150"
         >
           Reset Demo Data
@@ -182,30 +180,30 @@ export default function Sidebar({ activeTab = 'tasks', setActiveTab }: SidebarPr
 
         {/* Profile Card / Sign Out */}
         <div className="flex items-center justify-between p-2 rounded-xl bg-app-bg border border-border-color transition-colors duration-200">
-          <div 
+          <div
             onClick={() => setActiveTab && setActiveTab('profile')}
             className="flex items-center space-x-2.5 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
           >
             {user?.avatarUrl ? (
-              <img 
-                src={user.avatarUrl} 
-                alt={user.name} 
+              <img
+                src={user.avatarUrl}
+                alt={user.name}
                 className="w-8 h-8 rounded-full border border-border-color/50 object-cover bg-white"
               />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-bold text-xs uppercase leading-none">
-                {user?.name?.slice(0, 2)}
+              <div className="w-8 h-8 rounded-full bg-accent-light text-accent flex items-center justify-center font-bold text-xs">
+                {user?.name?.slice(0, 2).toUpperCase() || 'U'}
               </div>
             )}
-            <div className="text-left min-w-0">
-              <div className="text-sm font-semibold text-text-primary truncate">{user?.name}</div>
-              <div className="text-[10px] text-text-secondary font-medium leading-none mt-0.5">{user?.role || 'Guest'}</div>
+            <div className="min-w-0 flex flex-col">
+              <span className="text-xs font-bold text-text-primary truncate leading-tight">{user?.name || 'Guest User'}</span>
+              <span className="text-[10px] text-text-secondary truncate leading-none mt-0.5">{user?.role || 'Workspace Guest'}</span>
             </div>
           </div>
-          <button 
+          <button
             onClick={() => setShowLogoutConfirm(true)}
-            className="p-1.5 text-text-secondary hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 transition-all duration-150"
-            title="Log Out"
+            className="p-1.5 text-text-secondary hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+            title="Sign Out"
           >
             <LogOut size={16} />
           </button>
@@ -214,11 +212,11 @@ export default function Sidebar({ activeTab = 'tasks', setActiveTab }: SidebarPr
 
       {/* Premium Sign Out Confirmation Popup */}
       {showLogoutConfirm && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs transition-opacity duration-200"
           onClick={() => setShowLogoutConfirm(false)}
         >
-          <div 
+          <div
             className="bg-card-bg border border-border-color p-6 rounded-2xl max-w-[340px] w-full mx-4 shadow-xl transform scale-100 transition-all duration-200"
             onClick={(e) => e.stopPropagation()}
           >
@@ -244,6 +242,48 @@ export default function Sidebar({ activeTab = 'tasks', setActiveTab }: SidebarPr
                   className="flex-1 py-2 px-4 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-semibold shadow-md transition-colors"
                 >
                   Sign Out
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Premium Reset Data Confirmation Popup */}
+      {showResetConfirm && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs transition-opacity duration-200"
+          onClick={() => setShowResetConfirm(false)}
+        >
+          <div
+            className="bg-card-bg border border-border-color p-6 rounded-2xl max-w-[340px] w-full mx-4 shadow-xl transform scale-100 transition-all duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="w-12 h-12 rounded-full bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/50 flex items-center justify-center text-amber-500 animate-pulse">
+                <RotateCcw size={22} />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-text-primary">Reset Demo Data</h3>
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  Are you sure you want to reset all demo data? This will clear all existing tasks and comments and restore the default Figma project state.
+                </p>
+              </div>
+              <div className="flex items-center space-x-3 w-full pt-1">
+                <button
+                  onClick={() => setShowResetConfirm(false)}
+                  className="flex-1 py-2 px-4 rounded-xl border border-border-color hover:bg-border-color/10 text-text-primary text-xs font-semibold transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    setShowResetConfirm(false);
+                    await reseedDatabase();
+                  }}
+                  className="flex-1 py-2 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold shadow-md transition-colors"
+                >
+                  Reset Data
                 </button>
               </div>
             </div>

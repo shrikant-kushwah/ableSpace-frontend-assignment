@@ -32,6 +32,18 @@ export default function ProjectsList({ onSelectTask }: ProjectsListProps) {
   const [showFilterMenu, setShowFilterMenu] = useState(false);
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [deleteProjectId, setDeleteProjectId] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (!deleteProjectId) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setDeleteProjectId(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [deleteProjectId]);
 
   // Filter tasks to show as projects
   const filteredProjects = tasks.filter(task => {
@@ -298,9 +310,7 @@ export default function ProjectsList({ onSelectTask }: ProjectsListProps) {
                                 <button
                                   onClick={() => {
                                     setActiveMenuId(null);
-                                    if (confirm('Are you sure you want to delete this project?')) {
-                                      deleteTask(project._id);
-                                    }
+                                    setDeleteProjectId(project._id);
                                   }}
                                   className="w-full flex items-center space-x-2 px-3 py-1.5 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 dark:text-red-400 transition-colors text-[11px] font-medium"
                                 >
@@ -327,6 +337,49 @@ export default function ProjectsList({ onSelectTask }: ProjectsListProps) {
         onClose={() => setIsCreateOpen(false)}
         defaultStatus="todo"
       />
+
+      {/* Premium Delete Project Confirmation Popup */}
+      {deleteProjectId && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs transition-opacity duration-200"
+          onClick={() => setDeleteProjectId(null)}
+        >
+          <div 
+            className="bg-card-bg border border-border-color p-6 rounded-2xl max-w-[340px] w-full mx-4 shadow-xl transform scale-100 transition-all duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="w-12 h-12 rounded-full bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/50 flex items-center justify-center text-red-500 animate-bounce">
+                <Trash2 size={22} />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-text-primary">Delete Project</h3>
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  Are you sure you want to delete this project? This action cannot be undone and will permanently remove all associated information.
+                </p>
+              </div>
+              <div className="flex items-center space-x-3 w-full pt-1">
+                <button
+                  onClick={() => setDeleteProjectId(null)}
+                  className="flex-1 py-2 px-4 rounded-xl border border-border-color hover:bg-border-color/10 text-text-primary text-xs font-semibold transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    const id = deleteProjectId;
+                    setDeleteProjectId(null);
+                    await deleteTask(id);
+                  }}
+                  className="flex-1 py-2 px-4 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-semibold shadow-md transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

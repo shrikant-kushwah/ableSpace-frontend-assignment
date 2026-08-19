@@ -41,6 +41,22 @@ export default function TaskDrawer({ task, onClose }: TaskDrawerProps) {
 
   // Comment additions
   const [newComment, setNewComment] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Escape key handler
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showDeleteConfirm) {
+          setShowDeleteConfirm(false);
+        } else {
+          handleClose();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showDeleteConfirm, task, title, description]);
 
   // Slide animation trigger
   useEffect(() => {
@@ -61,6 +77,7 @@ export default function TaskDrawer({ task, onClose }: TaskDrawerProps) {
   if (!task) return null;
 
   const handleClose = async () => {
+    setShowDeleteConfirm(false);
     // Auto-save any active changes on close to prevent race conditions
     if (title.trim() && title !== task.title) {
       await updateTask(task._id, { title: title.trim() });
@@ -139,12 +156,15 @@ export default function TaskDrawer({ task, onClose }: TaskDrawerProps) {
     await updateTask(task._id, { assignees: newAssignees } as any);
   };
 
-  const handleDeleteTask = async () => {
-    if (window.confirm('Are you sure you want to delete this task?')) {
-      const success = await deleteTask(task._id);
-      if (success) {
-        handleClose();
-      }
+  const handleDeleteTask = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteTask = async () => {
+    setShowDeleteConfirm(false);
+    const success = await deleteTask(task._id);
+    if (success) {
+      handleClose();
     }
   };
 
@@ -536,6 +556,46 @@ export default function TaskDrawer({ task, onClose }: TaskDrawerProps) {
         </div>
 
       </div>
+
+      {/* Premium Delete Confirmation Modal Overlay */}
+      {showDeleteConfirm && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs transition-opacity duration-200"
+          onClick={() => setShowDeleteConfirm(false)}
+        >
+          <div 
+            className="bg-card-bg border border-border-color p-6 rounded-2xl max-w-[340px] w-full mx-4 shadow-xl transform scale-100 transition-all duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="w-12 h-12 rounded-full bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/50 flex items-center justify-center text-red-500 animate-bounce">
+                <Trash2 size={22} />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-text-primary">Delete Task</h3>
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  Are you sure you want to delete this task? This action cannot be undone and will permanently remove all associated comments, subtasks, and files.
+                </p>
+              </div>
+              <div className="flex items-center space-x-3 w-full pt-1">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 py-2 px-4 rounded-xl border border-border-color hover:bg-border-color/10 text-text-primary text-xs font-semibold transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDeleteTask}
+                  className="flex-1 py-2 px-4 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-semibold shadow-md transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
